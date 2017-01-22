@@ -1,71 +1,99 @@
 #include <MIDI.h>
 #include <Keypad.h>
 
-// Created and binds the MIDI interface to the default hardware Serial port
 MIDI_CREATE_DEFAULT_INSTANCE();
 
-const byte ROWS = 4; //four rows
-const byte COLS = 4; //three columns
+const byte ROWS = 4;
+const byte COLS = 4;
 char keys[ROWS][COLS] = {
-  {'1','2','3','4'},
-  {'5','6','7','8'},
-  {'9','a','b','c'},
-  {'d','e','f','g'}
+  {'1', '2', '3', '4'},
+  {'5', '6', '7', '8'},
+  {'9', 'a', 'b', 'c'},
+  {'d', 'e', 'f', 'g'}
 };
-byte rowPins[ROWS] = {5, 4, 2, 3}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {6, 7, 8, 9}; //connect to the column pinouts of the keypad
+byte rowPins[ROWS] = {5, 4, 3, 2};
+byte colPins[COLS] = {6, 7, 8, 9};
 
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+Keypad kpd = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 void setup()
 {
-    MIDI.begin(MIDI_CHANNEL_OMNI);  // Listen to all incoming messages
-    Serial.begin(115200);
-    keypad.addEventListener(keypadEvent);
+  MIDI.begin(MIDI_CHANNEL_OMNI);
+  Serial.begin(115200);
 }
 
 void loop()
 {
-    
-}
-
-void keypadEvent(KeypadEvent key){
-    switch (keypad.getState()){
-    case PRESSED:
-        if (key == '9') {
-            // kick
-            MIDI.sendNoteOn(72, 60, 1);
+  if (kpd.getKeys()) {
+    for (int i = 0; i < LIST_MAX; i++) {
+      if ( kpd.key[i].stateChanged ) {
+        switch (kpd.key[i].kstate) {
+          case PRESSED:
+            if (kpd.key[i].kchar == 'd') {
+              // kick
+              MIDI.sendNoteOn(72, 60, 1);
+            }
+            if (kpd.key[i].kchar == 'e') {
+              // snare
+              MIDI.sendNoteOn(72, 60, 2);
+            }
+            if (kpd.key[i].kchar == 'f') {
+              // closed hi-hat
+              MIDI.sendNoteOn(72, 60, 3);
+            }
+            if (kpd.key[i].kchar == 'g') {
+              // open hi-hat
+              MIDI.sendNoteOn(72, 60, 4);
+            }
+            if (kpd.key[i].kchar == '1') {
+              // sample 1
+              MIDI.sendNoteOn(72, 60, 5);
+            }
+            if (kpd.key[i].kchar == '2') {
+              // sample 2
+              MIDI.sendNoteOn(72, 60, 6);
+            }
+            if (kpd.key[i].kchar == '3') {
+              // sample 3
+              MIDI.sendNoteOn(72, 60, 7);
+            }
+            if (kpd.key[i].kchar == '4') {
+              // sample 4
+              MIDI.sendNoteOn(72, 60, 8);
+            }
+            break;
+          case HOLD:
+            break;
+          case RELEASED:
+            if (kpd.key[i].kchar == 'd') {
+              MIDI.sendNoteOff(72, 0, 1);
+            }
+            if (kpd.key[i].kchar == 'e') {
+              MIDI.sendNoteOn(72, 0, 2);
+            }
+            if (kpd.key[i].kchar == 'f') {
+              MIDI.sendNoteOn(72, 0, 3);
+            }
+            if (kpd.key[i].kchar == 'g') {
+              MIDI.sendNoteOn(72, 0, 4);
+            }
+            if (kpd.key[i].kchar == '1') {
+              MIDI.sendNoteOn(72, 0, 5);
+            }
+            if (kpd.key[i].kchar == '2') {
+              MIDI.sendNoteOn(72, 0, 6);
+            }
+            if (kpd.key[i].kchar == '3') {
+              MIDI.sendNoteOn(72, 0, 7);
+            }
+            if (kpd.key[i].kchar == '4') {
+              MIDI.sendNoteOn(72, 0, 8);
+            }
+            break;
+          case IDLE:
+            break;
         }
-        if (key == 'a') {
-            // snare
-            MIDI.sendNoteOn(72, 60, 2);
-        }
-        if (key == 'b') {
-            // closed hi-hat
-            MIDI.sendNoteOn(72, 60, 3);
-        }
-        if (key == 'c') {
-            // open hi-hat
-            MIDI.sendNoteOn(72, 60, 4);
-        }
-        break;
-
-    case RELEASED:
-        if (key == '9') {
-            MIDI.sendNoteOff(72, 0, 1);
-        }
-        if (key == 'a') {
-            MIDI.sendNoteOn(72, 0, 2);
-        }
-        if (key == 'b') {
-            MIDI.sendNoteOn(72, 0, 3);
-        }
-        if (key == 'c') {
-            MIDI.sendNoteOn(72, 0, 4);
-        }
-        break;
-
-    case HOLD:
-        break;
+      }
     }
+  }
 }
